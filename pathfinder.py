@@ -1,13 +1,19 @@
-row = 5
-column = 5
+row = 7
+column = 7
 
 maze = [[0 for col in range(column)] for r in range(row)]
 
-start_0 = 0
-start_1 = 0
+maze[4][4] = 1
+maze[4][5] = 1
+maze[4][6] = 1
+maze[4][3] = 1
 
-end_0 = 4
-end_1 = 2
+
+start_0 = 3
+start_1 = 4
+
+end_0 = 6
+end_1 = 5
 
 maze[start_0][start_1] = 3
 maze[end_0][end_1] = 4
@@ -64,7 +70,7 @@ def find_adjacent_nodes(node):
         if two_d[i][1] >= column:
             two_d[i][1] = -1
     new_array = []
-    # Removes all negative numbers from the two_d list
+    # Removes all negative numbers from the two_d list. 
     for items in two_d:
         numbers = [x for x in items if x >= 0]
         try:
@@ -72,9 +78,22 @@ def find_adjacent_nodes(node):
                 new_array.append(numbers)
         except IndexError:
             pass
+    remove_1_array = []
+    #Removes coordinates if they equal to one in the maze. If there is only one coordinate because a negative number has been removed, there will be an Index Error (which will be ignored).
+    for i in range(len(new_array)):
+        try:
+            index_one = new_array[i][0]
+            index_two = new_array[i][1]
+            if maze[index_one][index_two] != 1:
+                remove_1_array.append(new_array[i])
+            else:
+                remove_1_array.pop(i)
+        except IndexError:
+            pass
     # If there is only one item in the list (i.e. if a negative number has been removed), the list is not included
-    valid_coordinates = [x for x in new_array if len(x) > 1]
+    valid_coordinates = [x for x in remove_1_array if len(x) > 1]
     return valid_coordinates
+
 
 def distance_till_end(node):
     distance = (node[0] - ending_node[0]) ** 2 + (node[1] - ending_node[1]) ** 2
@@ -130,7 +149,9 @@ def a_star(starting_node):
                 except Exception:
                     open_list.append({"the_node": child, "g_value": child_dist_from_start, "f_value": child_f})
 
-
-print(a_star(starting_node))
+try:
+    print(a_star(starting_node))
+except ValueError:
+    print("There is no solution")
 
 printer(maze)
