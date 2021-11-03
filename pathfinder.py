@@ -7,6 +7,7 @@ maze[4][4] = 1
 maze[4][5] = 1
 maze[4][6] = 1
 maze[4][3] = 1
+maze[4][2] = 1
 
 
 start_0 = 3
@@ -107,7 +108,7 @@ def a_star(starting_node):
     path = []
     open_list = []
     closed_list = []
-    open_list.append({"the_node": starting_node, "g_value": 0, "f_value": 0})
+    open_list.append({"the_node": starting_node, "parent": str(starting_node) + ", ", "g_value": 0, "f_value": 0})
     while True:
         print(open_list)
         #deals with the current node
@@ -121,7 +122,9 @@ def a_star(starting_node):
         
         path.append(current_node)
         if current_node == ending_node:
-            return path
+            closed_current_node_index = next((index for (index, d) in enumerate(closed_list) if d["the_node"] == current_node), None)
+            quickest_path = closed_list[closed_current_node_index]["parent"]
+            return path, quickest_path
 
         #generate child nodes
         children = find_adjacent_nodes(current_node)
@@ -142,12 +145,18 @@ def a_star(starting_node):
                 #compares child's new distance with the value from the open_list 
                 try:
                     if child_dist_from_start > open_list_dist_value_from_start:
+                        string_of_parents = closed_list[closed_current_node_index]["parent"]
+                        removing_itself_and_its_former_parent = string_of_parents[24]
+                        open_list[child_index]["parent"] = removing_itself_and_its_former_parent + str(child)
                         open_list[child_index]["g_value"] = child_dist_from_start
                         open_list[child_index]["f_value"] = child_f
                         open_list_dist_value_from_start = None
+                    elif child_dist_from_start < open_list_dist_value_from_start:
+                        open_list[child_index]["parent"] = closed_list[closed_current_node_index]["parent"] + str(child)
+                        open_list_dist_value_from_start = None
                 #Errors will occur if the child was not in the open list 
                 except Exception:
-                    open_list.append({"the_node": child, "g_value": child_dist_from_start, "f_value": child_f})
+                    open_list.append({"the_node": child, "parent": closed_list[closed_current_node_index]["parent"] + str(child) + ", ", "g_value": child_dist_from_start, "f_value": child_f})
 
 try:
     print(a_star(starting_node))
