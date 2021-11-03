@@ -1,5 +1,6 @@
-row = 7
-column = 7
+import ast
+row = 11
+column = 11
 
 maze = [[0 for col in range(column)] for r in range(row)]
 
@@ -8,13 +9,19 @@ maze[4][5] = 1
 maze[4][6] = 1
 maze[4][3] = 1
 maze[4][2] = 1
+maze[4][7] = 1
+maze[4][8] = 1
+maze[4][9] = 1
+maze[4][10] = 1
+maze[4][1] = 1
+
 
 
 start_0 = 3
 start_1 = 4
 
-end_0 = 6
-end_1 = 5
+end_0 = 10
+end_1 = 10
 
 maze[start_0][start_1] = 3
 maze[end_0][end_1] = 4
@@ -110,7 +117,6 @@ def a_star(starting_node):
     closed_list = []
     open_list.append({"the_node": starting_node, "parent": str(starting_node) + ", ", "g_value": 0, "f_value": 0})
     while True:
-        print(open_list)
         #deals with the current node
         dict_with_lowest_f_value = min(open_list, key=lambda x:x["f_value"])
         current_node = dict_with_lowest_f_value["the_node"]  
@@ -124,6 +130,10 @@ def a_star(starting_node):
         if current_node == ending_node:
             closed_current_node_index = next((index for (index, d) in enumerate(closed_list) if d["the_node"] == current_node), None)
             quickest_path = closed_list[closed_current_node_index]["parent"]
+            #Knocks off the comma and space at the end
+            quickest_path = quickest_path[:-2]
+            #quickest_path is a string, and this line converts it into a tuple containing all of the coordinates as lists
+            quickest_path = ast.literal_eval(quickest_path)
             return path, quickest_path
 
         #generate child nodes
@@ -159,8 +169,13 @@ def a_star(starting_node):
                     open_list.append({"the_node": child, "parent": closed_list[closed_current_node_index]["parent"] + str(child) + ", ", "g_value": child_dist_from_start, "f_value": child_f})
 
 try:
-    print(a_star(starting_node))
+    long_path = a_star(starting_node)[0]
+    path = a_star(starting_node)[1]
 except ValueError:
     print("There is no solution")
 
+print(long_path)
+
 printer(maze)
+
+print(path)
