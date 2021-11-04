@@ -33,8 +33,6 @@ maze[5][16] = 1
 maze[5][1] = 1
 maze[5][2] = 1
 
-
-
 start_0 = 0
 start_1 = 16
 
@@ -180,18 +178,24 @@ def a_star(starting_node):
                 except Exception:
                     open_list.append({"the_node": child, "parent": closed_list[closed_current_node_index]["parent"] + str(child) + ", ", "g_value": child_dist_from_start, "f_value": child_f})
 
-try:
-    long_path = a_star(starting_node)[0]
-    path = a_star(starting_node)[1]
-except ValueError:
-    print("There is no solution")
+def main():
+    try:
+        long_path = a_star(starting_node)[0]
+        path = a_star(starting_node)[1]
+    except ValueError:
+        print("There is no solution")
 
-print(long_path)
+    print(long_path)
 
-printer(maze)
+    printer(maze)
 
-print(path)
+    print(path)
 
-print(type(path))
+    print(type(path))
+
+if __name__ == "__main__":
+    main()
+else:
+    pass
 
 

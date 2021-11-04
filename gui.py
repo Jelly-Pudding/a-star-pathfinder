@@ -109,6 +109,41 @@ def game_display():
         for j in range(len(maze[i])):
             pygame.draw.rect(screen, (0, 255, 0), (20*i, 20*j, 20, 20))
 
+    for i in range(len(maze)):
+        pygame.draw.line(screen, (255, 255, 255), (i*20, 0), (i*20, num_of_cols*20), 2)
+        for j in range(len(maze[i])):
+            pygame.draw.line(screen, (255, 255, 255), (0, j*20), (num_of_rows*20, j*20), 2)
+
+    #line across the bottom
+
+    pygame.draw.line(screen, (255, 255, 255), (0, num_of_cols*20), (num_of_rows*20, num_of_cols*20), 4)
+
+    #line down the right hand side
+
+    pygame.draw.line(screen, (255, 255, 255), (num_of_rows*20, 0), (num_of_rows*20, num_of_cols*20), 4)
+
+    '''
+    pygame.draw.line(screen, (255, 255, 255), (20, 0), (20, 200), 2)
+    pygame.draw.line(screen, (255, 255, 255), (40, 0), (40, 200), 2)
+    pygame.draw.line(screen, (255, 255, 255), (60, 0), (60, 200), 2)
+    pygame.draw.line(screen, (255, 255, 255), (80, 0), (80, 200), 2)
+    pygame.draw.line(screen, (255, 255, 255), (100, 0), (100, 200), 2)
+    pygame.draw.line(screen, (255, 255, 255), (120, 0), (120, 200), 2)
+    pygame.draw.line(screen, (255, 255, 255), (140, 0), (140, 200), 2)
+    pygame.draw.line(screen, (255, 255, 255), (160, 0), (160, 200), 2)
+    pygame.draw.line(screen, (255, 255, 255), (180, 0), (180, 200), 2)
+
+
+    pygame.draw.line(screen, (255, 255, 255), (0, 20), (200, 20), 2)
+    pygame.draw.line(screen, (255, 255, 255), (0, 40), (200, 40), 2)
+    pygame.draw.line(screen, (255, 255, 255), (0, 60), (200, 60), 2)
+    pygame.draw.line(screen, (255, 255, 255), (0, 80), (200, 80), 2)
+    pygame.draw.line(screen, (255, 255, 255), (0, 100), (200, 100), 2)
+    pygame.draw.line(screen, (255, 255, 255), (0, 120), (200, 120), 2)
+    pygame.draw.line(screen, (255, 255, 255), (0, 140), (200, 140), 2)
+    pygame.draw.line(screen, (255, 255, 255), (0, 160), (200, 160), 2)
+    pygame.draw.line(screen, (255, 255, 255), (0, 180), (200, 180), 2)
+    '''
     '''
     pygame.draw.rect(screen, (0, 255, 0), (0, 0, 20, 20))
     pygame.draw.rect(screen, (0, 255, 0), (20, 0, 20, 20))
