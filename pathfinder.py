@@ -1,7 +1,7 @@
 import ast
 import numpy as np
-row = 11
-column = 11
+row = 17
+column = 17
 
 maze = [[0 for col in range(column)] for r in range(row)]
 
@@ -9,20 +9,37 @@ maze[4][4] = 1
 maze[4][5] = 1
 maze[4][6] = 1
 maze[4][3] = 1
-maze[4][2] = 1
-maze[4][7] = 1
 maze[4][8] = 1
 maze[4][9] = 1
 maze[4][10] = 1
+maze[4][11] = 1
+maze[4][12] = 1
+maze[4][13] = 1
+maze[4][14] = 1
+maze[4][15] = 1
+maze[4][16] = 1
 maze[4][1] = 1
+maze[5][2] = 1
+maze[5][3] = 1
+maze[5][8] = 1
+maze[5][9] = 1
+maze[5][10] = 1
+maze[5][11] = 1
+maze[5][12] = 1
+maze[5][13] = 1
+maze[5][14] = 1
+maze[5][15] = 1
+maze[5][16] = 1
+maze[5][1] = 1
+maze[5][2] = 1
 
 
 
 start_0 = 0
-start_1 = 10
+start_1 = 16
 
-end_0 = 10
-end_1 = 10
+end_0 = 16
+end_1 = 16
 
 maze[start_0][start_1] = 3
 maze[end_0][end_1] = 4
