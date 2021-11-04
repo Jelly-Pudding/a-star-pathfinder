@@ -7,11 +7,12 @@ num_of_cols = 10
 
 screen = pygame.display.set_mode((200, 200))
 pygame.font.init()
-pygame.display.set_caption('A*')
+pygame.display.set_caption('Select Size')
 myfont = pygame.font.SysFont("timesnewroman", 30)
 text = myfont.render("start game", True, (255,255,255))
 input_box1 = pygame.Rect(30, 45, 150, 32)
 input_box2 = pygame.Rect(30, 115, 150, 32)
+done_box = pygame.Rect(50, 160, 110, 25)
 color_inactive = pygame.Color('lightskyblue3')
 color_active = pygame.Color('dodgerblue2')
 active1 = False
@@ -36,6 +37,10 @@ def displayer():
     screen.blit(create_input_text_1, (39,43))
     create_input_text_2 = myfont.render(input_text2, True, (50, 0, 0))
     screen.blit(create_input_text_2, (39, 115))
+
+    pygame.draw.rect(screen, (100, 100, 100), done_box)
+    finish_text = myfont.render("Done", True, (100, 0, 0))
+    screen.blit(finish_text, (73, 155))
     pygame.display.update()
 
 running = True
@@ -44,6 +49,7 @@ while running:
     displayer()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
+            pygame.quit()
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             if input_box1.collidepoint(event.pos):
@@ -56,10 +62,15 @@ while running:
             else:
                 active2 = False
             color = color_active if active2 else color_inactive
+            if done_box.collidepoint(event.pos):
+                pygame.quit()
+                running = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_q:
+                pygame.quit()
                 running = False
             if active1 == True:
+                active2 = False
                 if event.key == pygame.K_RETURN:
                     num_of_rows = input_text
                 elif event.key == pygame.K_BACKSPACE:
@@ -69,14 +80,15 @@ while running:
                     input_text += event.unicode
                     num_of_rows = input_text
             if active2 == True:
+                active1 = False
                 if event.key == pygame.K_RETURN:
                     num_of_cols = input_text2
                 elif event.key == pygame.K_BACKSPACE:
                     input_text = input_text2[:-1]
-                    num_of_rows = input_text2
+                    num_of_cols = input_text2
                 else:
                     input_text2 += event.unicode
-                    num_of_rows = input_text2
+                    num_of_cols = input_text2
 
 print(num_of_rows)
 print(num_of_cols)
