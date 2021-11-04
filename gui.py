@@ -4,7 +4,7 @@ import pygame
 #default size of row and column
 num_of_rows = 10
 num_of_cols = 10
-
+pygame.init()
 screen = pygame.display.set_mode((200, 200))
 pygame.font.init()
 pygame.display.set_caption('Select Size')
@@ -84,11 +84,57 @@ while running:
                 if event.key == pygame.K_RETURN:
                     num_of_cols = input_text2
                 elif event.key == pygame.K_BACKSPACE:
-                    input_text = input_text2[:-1]
+                    input_text2 = input_text2[:-1]
                     num_of_cols = input_text2
                 else:
                     input_text2 += event.unicode
                     num_of_cols = input_text2
 
+num_of_rows = int(num_of_rows)
+num_of_cols = int(num_of_cols)
 print(num_of_rows)
 print(num_of_cols)
+
+maze = [[0 for col in range(num_of_cols)] for row in range(num_of_rows)]
+
+printer(maze)
+
+pygame.init()
+screen = pygame.display.set_mode((num_of_rows * 20, num_of_cols * 20))
+print(pygame.display.get_window_size())
+#each box will be 5x5
+
+def game_display():
+    for i in range(len(maze)):
+        for j in range(len(maze[i])):
+            pygame.draw.rect(screen, (0, 255, 0), (20*i, 20*j, 20, 20))
+
+    '''
+    pygame.draw.rect(screen, (0, 255, 0), (0, 0, 20, 20))
+    pygame.draw.rect(screen, (0, 255, 0), (20, 0, 20, 20))
+    pygame.draw.rect(screen, (0, 255, 0), (40, 0, 20, 20))
+    pygame.draw.rect(screen, (0, 255, 0), (60, 0, 20, 20))
+    pygame.draw.rect(screen, (0, 255, 0), (80, 0, 20, 20))
+    pygame.draw.rect(screen, (0, 255, 0), (100, 0, 20, 20))
+    pygame.draw.rect(screen, (0, 255, 0), (120, 0, 20, 20))
+    pygame.draw.rect(screen, (0, 255, 0), (140, 0, 20, 20))
+    pygame.draw.rect(screen, (0, 255, 0), (160, 0, 20, 20))
+    pygame.draw.rect(screen, (0, 255, 0), (180, 0, 20, 20))
+    '''
+        
+
+    pygame.display.update()
+
+running = True
+
+while running:
+    game_display()
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_q:
+                pygame.quit()
+                running = False
+
