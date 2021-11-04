@@ -1,4 +1,5 @@
 import ast
+import numpy as np
 row = 11
 column = 11
 
@@ -17,8 +18,8 @@ maze[4][1] = 1
 
 
 
-start_0 = 3
-start_1 = 4
+start_0 = 0
+start_1 = 10
 
 end_0 = 10
 end_1 = 10
@@ -104,8 +105,7 @@ def find_adjacent_nodes(node):
 
 
 def distance_till_end(node):
-    distance = (node[0] - ending_node[0]) ** 2 + (node[1] - ending_node[1]) ** 2
-    return distance
+    return sum(abs(val1-val2) for val1, val2 in zip(node, ending_node))
 
 starting_node = find_start(maze)
 
@@ -116,7 +116,7 @@ def a_star(starting_node):
     open_list = []
     closed_list = []
     open_list.append({"the_node": starting_node, "parent": str(starting_node) + ", ", "g_value": 0, "f_value": 0})
-    while True:
+    while open_list != []:
         #deals with the current node
         dict_with_lowest_f_value = min(open_list, key=lambda x:x["f_value"])
         current_node = dict_with_lowest_f_value["the_node"]  
@@ -132,8 +132,9 @@ def a_star(starting_node):
             quickest_path = closed_list[closed_current_node_index]["parent"]
             #Knocks off the comma and space at the end
             quickest_path = quickest_path[:-2]
-            #quickest_path is a string, and this line converts it into a tuple containing all of the coordinates as lists
+            #quickest_path is a string, and this line converts it into a tuple containing all of the coordinates as separate list items
             quickest_path = ast.literal_eval(quickest_path)
+            print(closed_list)
             return path, quickest_path
 
         #generate child nodes
@@ -155,14 +156,8 @@ def a_star(starting_node):
                 #compares child's new distance with the value from the open_list 
                 try:
                     if child_dist_from_start > open_list_dist_value_from_start:
-                        string_of_parents = closed_list[closed_current_node_index]["parent"]
-                        removing_itself_and_its_former_parent = string_of_parents[24]
-                        open_list[child_index]["parent"] = removing_itself_and_its_former_parent + str(child)
-                        open_list[child_index]["g_value"] = child_dist_from_start
-                        open_list[child_index]["f_value"] = child_f
                         open_list_dist_value_from_start = None
                     elif child_dist_from_start < open_list_dist_value_from_start:
-                        open_list[child_index]["parent"] = closed_list[closed_current_node_index]["parent"] + str(child)
                         open_list_dist_value_from_start = None
                 #Errors will occur if the child was not in the open list 
                 except Exception:
@@ -179,3 +174,7 @@ print(long_path)
 printer(maze)
 
 print(path)
+
+print(type(path))
+
+
