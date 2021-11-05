@@ -1,5 +1,6 @@
 from pathfinder import *
 import pygame
+import numpy as np
 
 #default size of row and column
 num_of_rows = 10
@@ -100,14 +101,18 @@ maze = [[0 for col in range(num_of_cols)] for row in range(num_of_rows)]
 printer(maze)
 
 pygame.init()
+
+#each box (or node) will be 20x20. Therefore, width (number of rows) and height (number of columns) are multiplied by 20 so there is the exact amount of space needed for every box.
+
 screen = pygame.display.set_mode((num_of_rows * 20, num_of_cols * 20))
-print(pygame.display.get_window_size())
-#each box will be 5x5
+
+#This list places the positioning of every box on the screen in a unique dictionary, and the dictionaries also store where
+#the corresponding node will be in the maze list (referred to in the dictionary's key as "coordinates")
 
 input_box_list = []
 for i in range(len(maze)):
     for j in range(len(maze[i])):
-        input_box_list.append({"rectangle": pygame.Rect(20*i, 20*j, 20, 20), "coordinates": [j, i]})
+        input_box_list.append({"rectangle": pygame.Rect(20*i, 20*j, 20, 20), "coordinates": [i, j]})
 
 print(input_box_list)
 
@@ -116,14 +121,21 @@ input_box2 = pygame.Rect(30, 115, 150, 32)
 def game_display():
     for i in range(len(maze)):
         for j in range(len(maze[i])):
-            if maze[j][i] == 3:
+            #the starting node (shown as blue)
+            if maze[i][j] == 3:
+                pygame.draw.rect(screen, (0,0,255), pygame.Rect(20*i, 20*j, 20, 20))
+            #the ending node (shown as green)
+            elif maze[i][j] == 4:
                 pygame.draw.rect(screen, (0,255,0), pygame.Rect(20*i, 20*j, 20, 20))
+            #barriers in the path (shown as red)
+            elif maze[i][j] == 1:
+                pygame.draw.rect(screen, (255,0,0), pygame.Rect(20*i, 20*j, 20, 20)) 
+            #normal nodes (shown as grey)        
             else:
                 pygame.draw.rect(screen, (40,40,40), pygame.Rect(20*i, 20*j, 20, 20))
-    """
-    for index_of_item in range(len(input_box_list)):
-        pygame.draw.rect(screen, (40,40,40), input_box_list[index_of_item]["rectangle"])
-    """
+
+    #lines to separate the boxes from one another
+
     for i in range(len(maze)):
         pygame.draw.line(screen, (255, 255, 255), (i*20, 0), (i*20, num_of_cols*20), 2)
         for j in range(len(maze[i])):
@@ -141,6 +153,11 @@ def game_display():
 
 running = True
 
+#3 represents the starting node, and #4 the ending node (or goal node). Each should only be placed once, so these bool variables keep track of whether they have been placed.
+
+three_used_up = False
+four_used_up = False
+
 while running:
     game_display()
     for event in pygame.event.get():
@@ -154,9 +171,32 @@ while running:
         if event.type == pygame.MOUSEBUTTONDOWN:
             for idx in range(len(input_box_list)):
                 if input_box_list[idx]["rectangle"].collidepoint(event.pos):
-                    print(idx)
-                    print(input_box_list[idx]["coordinates"])
-                    maze[input_box_list[idx]["coordinates"][0]][input_box_list[idx]["coordinates"][1]] = 3
+                    if three_used_up == False:
+                        print(idx)
+                        print(input_box_list[idx]["coordinates"])
+                        #The first click will establish the maze's starting node.
+                        #The maze can be changed because the list 'input_box_list' is a list of dictionaries,
+                        #with each dictionary storing the location of a specific box in the game. These dictionaries
+                        #also keep track of where the index values of that box would be if it instead existed in the maze list. 
+                        maze[input_box_list[idx]["coordinates"][0]][input_box_list[idx]["coordinates"][1]] = 3
+                        three_used_up = True
+                    elif four_used_up == False:
+                        print(idx)
+                        print(input_box_list[idx]["coordinates"])
+                        #The second click will establish the maze's ending node
+                        maze[input_box_list[idx]["coordinates"][0]][input_box_list[idx]["coordinates"][1]] = 4
+                        four_used_up = True
+                    else:
+                        print(idx)
+                        print(input_box_list[idx]["coordinates"])
+                        #Subsequent clicks create barriers in the path
+                        maze[input_box_list[idx]["coordinates"][0]][input_box_list[idx]["coordinates"][1]] = 1
+
+                    
 
 printer(maze)
 
+actual_maze = np.array(maze)
+actual_maze = np.swapaxes(actual_maze,0,1)
+
+printer(actual_maze)
