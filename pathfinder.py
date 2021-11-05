@@ -1,26 +1,20 @@
 import ast
 import numpy as np
-row = 7
-column = 7
+row = 4
+column = 3
 
 maze = [[0 for col in range(column)] for r in range(row)]
 
-start_0 = 0
+start_0 = 3
 start_1 = 0
 
-end_0 = 6
-end_1 = 6
+end_0 = 0
+end_1 = 2
 
-maze[1][1] = 1
-maze[1][2] = 1
+maze[0][0] = 1
 maze[1][0] = 1
-maze[1][3] = 1
-maze[1][4] = 1
-maze[1][5] = 1
-maze[2][6] = 1
-maze[3][6] = 1
-maze[3][5] = 1
-maze[3][4] = 1
+maze[2][0] = 1
+maze[2][1] = 1
 
 maze[start_0][start_1] = 3
 maze[end_0][end_1] = 4
@@ -127,8 +121,8 @@ def find_adjacent_nodes(node):
 
 
 def distance_till_end(node):
-    return sum(abs(val1-val2) for val1, val2 in zip(node, ending_node))
-
+    distance = 2 ** ((node[0] - ending_node[0]) * 2 + (node[1] - ending_node[1]) * 2)
+    return distance
 starting_node = find_start(maze)
 
 ending_node = find_end(maze)
