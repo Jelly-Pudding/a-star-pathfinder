@@ -1,6 +1,7 @@
 import pygame
 import ast
 import numpy as np
+import math
 
 #default size of row and column
 num_of_rows = 10
@@ -206,16 +207,19 @@ def find_adjacent_nodes(node):
     valid_coordinates = [x for x in remove_1_array if len(x) > 1]
     return valid_coordinates
 
+def manhattan_distance(node):
+    h = abs(node[0] - ending_node[0]) + abs(node[1] - ending_node[1])
+    return h
 
-def distance_till_end(node):
-    distance = ((node[0] - ending_node[0]) ** 2) + ((node[1] - ending_node[1]) ** 2)
-    return distance
+def diagonal_distance(node):
+    dx = abs(node[0] - ending_node[0])
+    dy = abs(node[1] - ending_node[1])
+    #Assumes length of nodes is 1, and thus the diagonal distance between nodes is the square root of 2.
+    #These numbers are multiplied by 10 to give 10 and 14.
+    h = 10 * (dx + dy) + (14 - 2 * 10) * min(dx, dy)
+    return h
 
-    diagonal_distance = 10 * (x + y) + (14 - 2 * 10) * min(x, y)
-    return diagonal_distance
-
-
-def a_star(starting_node):
+def a_star(starting_node, distance_till_end_function):
     child_count = 0 
     count = 0
     path = []
@@ -247,7 +251,7 @@ def a_star(starting_node):
             parent = current_node
             closed_current_node_index = next((index for (index, d) in enumerate(closed_list) if d["the_node"] == current_node), None)
             child_dist_from_start = current_node_g_value + 1
-            child_dist_from_end = distance_till_end(child)
+            child_dist_from_end = distance_till_end_function(child)
             child_f = child_dist_from_start + child_dist_from_end
 
             if child == ending_node:
@@ -314,8 +318,15 @@ while running:
                 maze = np.swapaxes(maze,0,1)
                 print("adjacent nodes = " + str(find_adjacent_nodes([0, 3])))
                 print(maze)
-                pather = a_star(starting_node)
-                print(pather)
+                path_manhattan = a_star(starting_node, manhattan_distance)
+                path_diagonal = a_star(starting_node, diagonal_distance)
+                print("manhattan path = " + str(path_manhattan))
+                print("diagonal path = " + str(path_diagonal))
+                if len(path_manhattan) <= len(path_diagonal):
+                    best_path = path_manhattan
+                else:
+                    best_path = path_diagonal
+                print("best path - " + str(best_path))
                 maze = np.swapaxes(maze,0,1)
 
         if event.type == pygame.MOUSEBUTTONDOWN:
