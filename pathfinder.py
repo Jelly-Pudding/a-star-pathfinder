@@ -1,50 +1,57 @@
 import ast
 import numpy as np
-row = 17
-column = 17
+row = 7
+column = 7
 
 maze = [[0 for col in range(column)] for r in range(row)]
 
-maze[4][4] = 1
-maze[4][5] = 1
-maze[4][6] = 1
-maze[4][3] = 1
-maze[4][8] = 1
-maze[4][9] = 1
-maze[4][10] = 1
-maze[4][11] = 1
-maze[4][12] = 1
-maze[4][13] = 1
-maze[4][14] = 1
-maze[4][15] = 1
-maze[4][16] = 1
-maze[4][1] = 1
-maze[5][2] = 1
-maze[5][3] = 1
-maze[5][8] = 1
-maze[5][9] = 1
-maze[5][10] = 1
-maze[5][11] = 1
-maze[5][12] = 1
-maze[5][13] = 1
-maze[5][14] = 1
-maze[5][15] = 1
-maze[5][16] = 1
-maze[5][1] = 1
-maze[5][2] = 1
-
 start_0 = 0
-start_1 = 16
+start_1 = 0
 
-end_0 = 16
-end_1 = 16
+end_0 = 6
+end_1 = 6
+
+maze[1][1] = 1
+maze[1][2] = 1
+maze[1][0] = 1
+maze[1][3] = 1
+maze[1][4] = 1
+maze[1][5] = 1
+maze[2][6] = 1
+maze[3][6] = 1
+maze[3][5] = 1
+maze[3][4] = 1
 
 maze[start_0][start_1] = 3
 maze[end_0][end_1] = 4
 
+'''
+maze[0][0] = 1
+maze[1][0] = 1
+maze[1][1] = 1
+
+maze[2][0] = 1
+maze[2][1] = 1
+maze[2][2] = 1
+maze[2][3] = 1
+maze[3][3] = 1
+
+
+start_0 = 4
+start_1 = 0
+
+end_0 = 0
+end_1 = 4
+
+maze[start_0][start_1] = 3
+maze[end_0][end_1] = 4
+
+'''
+
 def printer(maze):
     for i in maze:
         print(i)
+
 
 def find_start(maze):
     start = []
@@ -126,76 +133,106 @@ starting_node = find_start(maze)
 
 ending_node = find_end(maze)
 
+
+
 def a_star(starting_node):
+    child_count = 0 
+    count = 0
     path = []
+    unseen_list = []
+    for i in range(len(maze)):
+        for j in range(len(maze[i])):
+            unseen_list.append({"the_node": [i, j]})
+    print(unseen_list)
     open_list = []
     closed_list = []
-    open_list.append({"the_node": starting_node, "parent": str(starting_node) + ", ", "g_value": 0, "f_value": 0})
+    open_list.append({"the_node": starting_node, "parent": None, "g_value": 0, "f_value": 0})
+    count = 0
     while open_list != []:
+        count += 1
+        print(count)
         #deals with the current node
         dict_with_lowest_f_value = min(open_list, key=lambda x:x["f_value"])
-        current_node = dict_with_lowest_f_value["the_node"]  
+        current_node = dict_with_lowest_f_value["the_node"]
+        parent_of_current_node = dict_with_lowest_f_value["parent"]
+        current_node_g_value = dict_with_lowest_f_value["g_value"]  
         current_node_index = next((index for (index, d) in enumerate(open_list) if d["the_node"] == current_node), None)
-        closed_list.append(open_list[current_node_index])
+        print("open_list before pop: " + str(open_list))
         open_list.pop(current_node_index)
-        
-        #found goal
-        
-        path.append(current_node)
-        if current_node == ending_node:
-            closed_current_node_index = next((index for (index, d) in enumerate(closed_list) if d["the_node"] == current_node), None)
-            quickest_path = closed_list[closed_current_node_index]["parent"]
-            #Knocks off the comma and space at the end
-            quickest_path = quickest_path[:-2]
-            #quickest_path is a string, and this line converts it into a tuple containing all of the coordinates as separate list items
-            quickest_path = ast.literal_eval(quickest_path)
-            print(closed_list)
-            return path, quickest_path
 
-        #generate child nodes
+        print("open_list after pop: " + str(open_list))
+
+
+
         children = find_adjacent_nodes(current_node)
-        
         for child in children:
-            #if the child is not in the closed list
-            if not any(d['the_node'] == child for d in closed_list):
-                closed_current_node_index = next((index for (index, d) in enumerate(closed_list) if d["the_node"] == current_node), None)
-                child_dist_from_start = closed_list[closed_current_node_index]["g_value"] + 1
-                child_dist_from_end = distance_till_end(child)
-                child_f = child_dist_from_start + child_dist_from_end
+            parent = current_node
+            closed_current_node_index = next((index for (index, d) in enumerate(closed_list) if d["the_node"] == current_node), None)
+            child_dist_from_start = current_node_g_value + 1
+            child_dist_from_end = distance_till_end(child)
+            child_f = child_dist_from_start + child_dist_from_end
+            print(str(child) + " g = " + str(child_dist_from_start) + " h = " + str(child_dist_from_end) + " f = " + str(child_f))
 
-                
-                #Checks if the child is in the open list
-                if any(d['the_node'] == child for d in open_list):
-                    child_index = next((index for (index, d) in enumerate(open_list) if d["the_node"] == child), None)
-                    open_list_dist_value_from_start = open_list[child_index]["g_value"]
-                #compares child's new distance with the value from the open_list 
-                try:
-                    if child_dist_from_start > open_list_dist_value_from_start:
-                        open_list_dist_value_from_start = None
-                    elif child_dist_from_start < open_list_dist_value_from_start:
-                        open_list_dist_value_from_start = None
-                #Errors will occur if the child was not in the open list 
-                except Exception:
-                    open_list.append({"the_node": child, "parent": closed_list[closed_current_node_index]["parent"] + str(child) + ", ", "g_value": child_dist_from_start, "f_value": child_f})
+            if child == ending_node:
+                print("\n")
+                print("open " + str(open_list) + "\n")
+                print("closed " + str(closed_list))
+                print("parent of current node:" + str(parent_of_current_node))
+                path = []
+                path.append(child)
+                path.append(parent)
+                parent = parent_of_current_node
+                while parent != None:
+                    path.append(parent)
+                    parent_closed_list_index = next((index for (index, d) in enumerate(closed_list) if d["the_node"] == parent), None)
+                    if parent_closed_list_index == None:
+                        parent = None
+                    else:
+                        parent = closed_list[parent_closed_list_index]["parent"]
+                return path[::-1]
 
+
+            #equals None if the child node is not in the open list - else gives the index of the dictionary's place in the list
+            child_open_list_node_index = next((index for (index, d) in enumerate(open_list) if d["the_node"] == child), None)
+            if child_open_list_node_index != None:
+                if open_list[child_open_list_node_index]["f_value"] < child_f:
+                    continue
+            
+            child_closed_list_node_index = next((index for (index, d) in enumerate(closed_list) if d["the_node"] == child), None)
+            if child_closed_list_node_index != None:
+                if closed_list[child_closed_list_node_index]["f_value"] < child_f:
+                    continue
+                else:
+                    if child_open_list_node_index != None:
+                        open_list[child_open_list_node_index] = {"the_node": child, "parent": parent, "g_value": child_dist_from_start, "f_value": child_f}
+
+            child_unseen_list_node_index = next((index for (index, d) in enumerate(unseen_list) if d["the_node"] == child), None)
+            if child_unseen_list_node_index != None:
+                open_list.append({"the_node": child, "parent": parent, "g_value": child_dist_from_start, "f_value": child_f})
+                unseen_list.pop(child_unseen_list_node_index)
+
+        closed_list.append(dict_with_lowest_f_value)
+
+        print("closed list at end of while loop: " + str(closed_list))
+        print("open list at end of while loop: " + str(open_list))
+            
+            
+
+            
+        
 def main():
     try:
-        long_path = a_star(starting_node)[0]
-        path = a_star(starting_node)[1]
+        path = a_star(starting_node)
+
     except ValueError:
         print("There is no solution")
 
-    print(long_path)
 
     printer(maze)
 
     print(path)
 
-    print(type(path))
-
 if __name__ == "__main__":
     main()
 else:
     pass
-
-
