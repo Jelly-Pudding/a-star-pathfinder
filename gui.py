@@ -115,9 +115,10 @@ for i in range(len(maze)):
     for j in range(len(maze[i])):
         input_box_list.append({"rectangle": pygame.Rect(20*i, 20*j, 20, 20), "coordinates": [i, j]})
 
-#print(input_box_list)
 
-input_box2 = pygame.Rect(30, 115, 150, 32)
+#if the enter key is pressed, then the a* algorithm starts and this variable becomes True
+
+hit_enter = False
 
 def game_display():
     for i in range(len(maze)):
@@ -135,6 +136,10 @@ def game_display():
             else:
                 pygame.draw.rect(screen, (40,40,40), pygame.Rect(20*i, 20*j, 20, 20))
 
+    if hit_enter == True:
+        for items in best_path:
+            pygame.draw.rect(screen, (10,10,10), pygame.Rect(20*items[1], 20*items[0], 20, 20))
+
     #lines to separate the boxes from one another
 
     for i in range(len(maze)):
@@ -149,6 +154,12 @@ def game_display():
     #line down the right hand side
 
     pygame.draw.line(screen, (255, 255, 255), (num_of_rows*20, 0), (num_of_rows*20, num_of_cols*20), 4)
+
+
+
+            
+        
+
 
     pygame.display.update()
 
@@ -303,6 +314,8 @@ running = True
 three_used_up = False
 four_used_up = False
 
+
+
 while running:
     game_display()
     for event in pygame.event.get():
@@ -326,6 +339,7 @@ while running:
                     best_path = path_manhattan
                 else:
                     best_path = path_diagonal
+                hit_enter = True
                 print("best path - " + str(best_path))
                 maze = np.swapaxes(maze,0,1)
 
