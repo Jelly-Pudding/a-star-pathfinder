@@ -1,7 +1,6 @@
 import pygame
-import ast
 import numpy as np
-import math
+
 
 #default size of row and column
 num_of_rows = 10
@@ -230,6 +229,12 @@ def diagonal_distance(node):
     h = 10 * (dx + dy) + (14 - 2 * 10) * min(dx, dy)
     return h
 
+def euclidean_distance(node):
+    node_numpy = np.array(node)
+    ending_node_numpy = np.array(ending_node)
+    return np.linalg.norm(node_numpy - ending_node_numpy)
+
+
 def a_star(starting_node, distance_till_end_function):
     child_count = 0 
     count = 0
@@ -333,14 +338,27 @@ while running:
                 print(maze)
                 path_manhattan = a_star(starting_node, manhattan_distance)
                 path_diagonal = a_star(starting_node, diagonal_distance)
+                path_euclidean = a_star(starting_node, euclidean_distance)
                 print("manhattan path = " + str(path_manhattan))
+                print("manhattan path length:" + str(len(path_manhattan)))
                 print("diagonal path = " + str(path_diagonal))
-                if len(path_manhattan) <= len(path_diagonal):
-                    best_path = path_manhattan
-                else:
-                    best_path = path_diagonal
+                print("diagonal path length:" + str(len(path_diagonal)))
+                print("euclidean path = " + str(path_euclidean))
+                print("euclidean path length:" + str(len(path_euclidean)))
+                different_paths = [path_manhattan, path_diagonal, path_euclidean]
+                best_path = min(different_paths, key=len)
+                for i in range(len(different_paths)):
+                    if different_paths[i] == best_path:
+                        if i == 0:
+                            name_of_tool = "manhattan"
+                        elif i == 1:
+                            name_of_tool = "diagonal"
+                        else:
+                            name_of_tool = "euclidean"
+                        break
                 hit_enter = True
                 print("best path - " + str(best_path))
+                print("Tool used: " + str(name_of_tool))
                 maze = np.swapaxes(maze,0,1)
 
         if event.type == pygame.MOUSEBUTTONDOWN:
