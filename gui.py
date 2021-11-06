@@ -1,5 +1,6 @@
 import pygame
 import numpy as np
+import time
 
 
 #default size of row and column
@@ -154,12 +155,6 @@ def game_display():
 
     pygame.draw.line(screen, (255, 255, 255), (num_of_rows*20, 0), (num_of_rows*20, num_of_cols*20), 4)
 
-
-
-            
-        
-
-
     pygame.display.update()
 
 def find_adjacent_nodes(node):
@@ -235,6 +230,11 @@ def euclidean_distance(node):
     return np.linalg.norm(node_numpy - ending_node_numpy)
 
 
+
+#When this is set to True, the a* function will show the algorithm trying out different paths to the end node.
+show_algorithm_in_progress = False
+
+
 def a_star(starting_node, distance_till_end_function):
     child_count = 0 
     count = 0
@@ -246,6 +246,7 @@ def a_star(starting_node, distance_till_end_function):
     print(unseen_list)
     open_list = []
     closed_list = []
+    show_current_nodes_to_gui = []
     open_list.append({"the_node": starting_node, "parent": None, "g_value": 0, "f_value": 0})
     count = 0
     while open_list != []:
@@ -308,7 +309,23 @@ def a_star(starting_node, distance_till_end_function):
                 open_list.append({"the_node": child, "parent": parent, "g_value": child_dist_from_start, "f_value": child_f})
                 unseen_list.pop(child_unseen_list_node_index)
 
+
+            if show_algorithm_in_progress == True:
+                time.sleep(0.2)
+                show_current_nodes_to_gui.append(current_node)
+                pygame.draw.rect(screen, (255,99,71), pygame.Rect(20*current_node[1], 20*current_node[0], 20, 20))
+                pygame.draw.rect(screen, (255,192,203), pygame.Rect(20*child[1], 20*child[0], 20, 20))
+                pygame.display.update()
+                for i in range(len(maze)):
+                    pygame.draw.line(screen, (255, 255, 255), (i*20, 0), (i*20, num_of_cols*20), 2)
+                    for j in range(len(maze[i])):
+                        pygame.draw.line(screen, (255, 255, 255), (0, j*20), (num_of_rows*20, j*20), 2)
+
         closed_list.append(dict_with_lowest_f_value)
+
+
+
+
         print("closed list at end of while loop: " + str(closed_list))
         print("open list at end of while loop: " + str(open_list))
 
@@ -349,12 +366,16 @@ while running:
                 best_path = min(different_paths, key=len)
                 for i in range(len(different_paths)):
                     if different_paths[i] == best_path:
+                        show_algorithm_in_progress = True
                         if i == 0:
                             name_of_tool = "manhattan"
+                            a_star(starting_node, manhattan_distance)
                         elif i == 1:
                             name_of_tool = "diagonal"
+                            a_star(starting_node, diagonal_distance)
                         else:
                             name_of_tool = "euclidean"
+                            a_star(starting_node, euclidean_distance)
                         break
                 hit_enter = True
                 print("best path - " + str(best_path))
