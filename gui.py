@@ -136,11 +136,9 @@ def game_display():
             #normal nodes (shown as grey)        
             else:
                 pygame.draw.rect(screen, (40,40,40), pygame.Rect(20*i, 20*j, 20, 20))
-
-    if hit_enter == True:
+    if hit_enter == True and remove_fastest_path_after_clicking == False:
         for items in best_path:
             pygame.draw.rect(screen, (0,255,0), pygame.Rect(20*items[1], 20*items[0], 20, 20))
-
     #lines to separate the boxes from one another
 
     for i in range(len(maze)):
@@ -230,6 +228,9 @@ def euclidean_distance(node):
     ending_node_numpy = np.array(ending_node)
     return np.linalg.norm(node_numpy - ending_node_numpy)
 
+def zero_distance(node):
+    return 0
+
 
 
 #When this is set to True, the a* function will show the algorithm trying out different paths to the end node.
@@ -311,11 +312,15 @@ def a_star(starting_node, distance_till_end_function):
 
 
             if show_algorithm_in_progress == True:
-                time.sleep(0.05)
+                # a* pathing failed to find the optimal path due to overestimation of the distance to the end. Because the alternative method (dijkstra)
+                # is much slower, we don't want there to be any time delay whatsoever. 
+                # slows down for different rates depending upon the board size
+                if num_of_cols + num_of_rows <= 20 and bruteforce_dijkstra != True:
+                    time.sleep(0.05)
                 pygame.draw.rect(screen, (255,192,203), pygame.Rect(20*child[1], 20*child[0], 20, 20))
                 pygame.draw.rect(screen, (255,40,90), pygame.Rect(20*current_node[1], 20*current_node[0], 20, 20))
                 for items in closed_list:
-                    pygame.draw.rect(screen, (0,0,0), pygame.Rect(20*items["the_node"][1], 20*items["the_node"][0], 20, 20))    
+                    pygame.draw.rect(screen, (114,192,203), pygame.Rect(20*items["the_node"][1], 20*items["the_node"][0], 20, 20))  
                 current_fastest_path = []
                 current_fastest_path.append(current_node)
                 parent = parent_of_current_node
@@ -351,6 +356,16 @@ four_used_up = False
 wait_till_enable_hold_mouse_down = True
 count_till_hold_mouse_down = 1
 
+# if a* does not find the quickest path (due to overestimating the distance to the end node) then the distance function which always returns 0 will produce the shorest path
+# to the destination. Because this is a much longer method for arriving at the destination, this variable will be set to true so that when one sees the grid gui, there will
+# no time delay. 
+
+bruteforce_dijkstra = False
+
+enter_key_counter = 0
+
+remove_fastest_path_after_clicking = False
+
 while running:
     game_display()
     for event in pygame.event.get():
@@ -362,6 +377,10 @@ while running:
                 pygame.quit()
                 sys.exit()
             elif event.key == pygame.K_RETURN:
+                remove_fastest_path_after_clicking = False
+                enter_key_counter += 1
+                if enter_key_counter >= 2:
+                    show_algorithm_in_progress = False
                 maze = np.array(maze)
                 maze = np.swapaxes(maze,0,1)
                 #print("adjacent nodes = " + str(find_adjacent_nodes([0, 3])))
@@ -369,13 +388,16 @@ while running:
                 path_manhattan = a_star(starting_node, manhattan_distance)
                 path_diagonal = a_star(starting_node, diagonal_distance)
                 path_euclidean = a_star(starting_node, euclidean_distance)
+                path_zero = a_star(starting_node, zero_distance)
                 print("manhattan path = " + str(path_manhattan))
                 print("manhattan path length:" + str(len(path_manhattan)))
                 print("diagonal path = " + str(path_diagonal))
                 print("diagonal path length:" + str(len(path_diagonal)))
                 print("euclidean path = " + str(path_euclidean))
                 print("euclidean path length:" + str(len(path_euclidean)))
-                different_paths = [path_manhattan, path_diagonal, path_euclidean]
+                print("zero distance = " + str(path_zero))
+                print("zero distance path length:" + str(len(path_zero)))
+                different_paths = [path_manhattan, path_diagonal, path_euclidean, path_zero]
                 best_path = min(different_paths, key=len)
                 for i in range(len(different_paths)):
                     if different_paths[i] == best_path:
@@ -386,9 +408,13 @@ while running:
                         elif i == 1:
                             name_of_tool = "diagonal"
                             a_star(starting_node, diagonal_distance)
-                        else:
+                        elif i == 2:
                             name_of_tool = "euclidean"
                             a_star(starting_node, euclidean_distance)
+                        elif i == 3:
+                            bruteforce_dijkstra = True
+                            name_of_tool = "Zero distance"
+                            a_star(starting_node, zero_distance)
                         break
                 hit_enter = True
                 print("best path - " + str(best_path))
@@ -427,6 +453,7 @@ while running:
                             count_till_hold_mouse_down -= 1
 
         elif pygame.mouse.get_pressed()[0]:
+            remove_fastest_path_after_clicking = True
             #tracks whether the mouse button is held down
             #There will be an AttributeError if the user holds down the mouse and then goes offscreen. When this occurs, the error is ignored.
             try:
@@ -439,10 +466,8 @@ while running:
                     
 '''
 printer(maze)
-
 actual_maze = np.array(maze)
 actual_maze = np.swapaxes(actual_maze,0,1)
-
 printer(actual_maze)
 print(starting_node)
 print(ending_node)
