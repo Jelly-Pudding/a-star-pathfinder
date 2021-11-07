@@ -138,7 +138,7 @@ def game_display():
 
     if hit_enter == True:
         for items in best_path:
-            pygame.draw.rect(screen, (10,10,10), pygame.Rect(20*items[1], 20*items[0], 20, 20))
+            pygame.draw.rect(screen, (0,255,0), pygame.Rect(20*items[1], 20*items[0], 20, 20))
 
     #lines to separate the boxes from one another
 
@@ -246,7 +246,6 @@ def a_star(starting_node, distance_till_end_function):
     print(unseen_list)
     open_list = []
     closed_list = []
-    show_current_nodes_to_gui = []
     open_list.append({"the_node": starting_node, "parent": None, "g_value": 0, "f_value": 0})
     count = 0
     while open_list != []:
@@ -311,15 +310,28 @@ def a_star(starting_node, distance_till_end_function):
 
 
             if show_algorithm_in_progress == True:
-                time.sleep(0.2)
-                show_current_nodes_to_gui.append(current_node)
-                pygame.draw.rect(screen, (255,99,71), pygame.Rect(20*current_node[1], 20*current_node[0], 20, 20))
+                time.sleep(0.3)
                 pygame.draw.rect(screen, (255,192,203), pygame.Rect(20*child[1], 20*child[0], 20, 20))
-                pygame.display.update()
+                pygame.draw.rect(screen, (255,40,90), pygame.Rect(20*current_node[1], 20*current_node[0], 20, 20))
+                for items in closed_list:
+                    pygame.draw.rect(screen, (0,0,0), pygame.Rect(20*items["the_node"][1], 20*items["the_node"][0], 20, 20))    
+                current_fastest_path = []
+                current_fastest_path.append(current_node)
+                parent = parent_of_current_node
+                while parent != None:
+                    current_fastest_path.append(parent)
+                    parent_closed_list_index = next((index for (index, d) in enumerate(closed_list) if d["the_node"] == parent), None)
+                    if parent_closed_list_index == None:
+                        parent = None
+                    else:
+                        parent = closed_list[parent_closed_list_index]["parent"]
+                for items in current_fastest_path:
+                    pygame.draw.rect(screen, (150,255,220), pygame.Rect(20*items[1], 20*items[0], 20, 20))
                 for i in range(len(maze)):
                     pygame.draw.line(screen, (255, 255, 255), (i*20, 0), (i*20, num_of_cols*20), 2)
                     for j in range(len(maze[i])):
                         pygame.draw.line(screen, (255, 255, 255), (0, j*20), (num_of_rows*20, j*20), 2)
+                pygame.display.update()
 
         closed_list.append(dict_with_lowest_f_value)
 
