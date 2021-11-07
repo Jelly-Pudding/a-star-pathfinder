@@ -311,7 +311,7 @@ def a_star(starting_node, distance_till_end_function):
 
 
             if show_algorithm_in_progress == True:
-                time.sleep(0.1)
+                time.sleep(0.05)
                 pygame.draw.rect(screen, (255,192,203), pygame.Rect(20*child[1], 20*child[0], 20, 20))
                 pygame.draw.rect(screen, (255,40,90), pygame.Rect(20*current_node[1], 20*current_node[0], 20, 20))
                 for items in closed_list:
@@ -346,7 +346,10 @@ running = True
 three_used_up = False
 four_used_up = False
 
+# variable used to make sure the ending node isn't accidentally overwritten in the beginning
 
+wait_till_enable_hold_mouse_down = True
+count_till_hold_mouse_down = 1
 
 while running:
     game_display()
@@ -391,36 +394,47 @@ while running:
                 print("best path - " + str(best_path))
                 print("Tool used: " + str(name_of_tool))
                 maze = np.swapaxes(maze,0,1)
+        if four_used_up == False or count_till_hold_mouse_down != 0:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                for idx in range(len(input_box_list)):
+                    if input_box_list[idx]["rectangle"].collidepoint(event.pos):
+                        if three_used_up == False:
+                            #print(idx)
+                            #print(input_box_list[idx]["coordinates"])
+                            #The first click will establish the maze's starting node.
+                            #The maze can be changed because the list 'input_box_list' is a list of dictionaries,
+                            #with each dictionary storing the location of a specific box in the game. These dictionaries
+                            #also keep track of where the index values of that box would be if it instead existed in the maze list. 
+                            maze[input_box_list[idx]["coordinates"][0]][input_box_list[idx]["coordinates"][1]] = 3
+                            first_coord = input_box_list[idx]["coordinates"][0]
+                            second_coord = input_box_list[idx]["coordinates"][1]
+                            starting_node = [second_coord, first_coord]
+                            three_used_up = True
+                        elif four_used_up == False:
+                            #print(idx)
+                            #print(input_box_list[idx]["coordinates"])
+                            #The second click will establish the maze's ending node
+                            maze[input_box_list[idx]["coordinates"][0]][input_box_list[idx]["coordinates"][1]] = 4
+                            first_coord = input_box_list[idx]["coordinates"][0]
+                            second_coord = input_box_list[idx]["coordinates"][1]
+                            ending_node = [second_coord, first_coord]
+                            four_used_up = True
+                        else:
+                            #print(idx)
+                            #print(input_box_list[idx]["coordinates"])
+                            #Subsequent clicks create barriers in the path
+                            maze[input_box_list[idx]["coordinates"][0]][input_box_list[idx]["coordinates"][1]] = 1
+                            count_till_hold_mouse_down -= 1
 
-        if pygame.mouse.get_pressed()[0]:
-            for idx in range(len(input_box_list)):
-                if input_box_list[idx]["rectangle"].collidepoint(event.pos):
-                    if three_used_up == False:
-                        #print(idx)
-                        #print(input_box_list[idx]["coordinates"])
-                        #The first click will establish the maze's starting node.
-                        #The maze can be changed because the list 'input_box_list' is a list of dictionaries,
-                        #with each dictionary storing the location of a specific box in the game. These dictionaries
-                        #also keep track of where the index values of that box would be if it instead existed in the maze list. 
-                        maze[input_box_list[idx]["coordinates"][0]][input_box_list[idx]["coordinates"][1]] = 3
-                        first_coord = input_box_list[idx]["coordinates"][0]
-                        second_coord = input_box_list[idx]["coordinates"][1]
-                        starting_node = [second_coord, first_coord]
-                        three_used_up = True
-                    elif four_used_up == False:
-                        #print(idx)
-                        #print(input_box_list[idx]["coordinates"])
-                        #The second click will establish the maze's ending node
-                        maze[input_box_list[idx]["coordinates"][0]][input_box_list[idx]["coordinates"][1]] = 4
-                        first_coord = input_box_list[idx]["coordinates"][0]
-                        second_coord = input_box_list[idx]["coordinates"][1]
-                        ending_node = [second_coord, first_coord]
-                        four_used_up = True
-                    else:
-                        #print(idx)
-                        #print(input_box_list[idx]["coordinates"])
-                        #Subsequent clicks create barriers in the path
+        elif pygame.mouse.get_pressed()[0]:
+            #tracks whether the mouse button is held down
+            #There will be an AttributeError if the user holds down the mouse and then goes offscreen. When this occurs, the error is ignored.
+            try:
+                for idx in range(len(input_box_list)):
+                    if input_box_list[idx]["rectangle"].collidepoint(event.pos):
                         maze[input_box_list[idx]["coordinates"][0]][input_box_list[idx]["coordinates"][1]] = 1
+            except AttributeError:
+                pass
 
                     
 '''
