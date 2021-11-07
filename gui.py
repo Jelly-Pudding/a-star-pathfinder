@@ -1,6 +1,7 @@
 import pygame
 import numpy as np
 import time
+import sys
 
 
 #default size of row and column
@@ -243,24 +244,24 @@ def a_star(starting_node, distance_till_end_function):
     for i in range(len(maze)):
         for j in range(len(maze[i])):
             unseen_list.append({"the_node": [i, j]})
-    print(unseen_list)
+    #print(unseen_list)
     open_list = []
     closed_list = []
     open_list.append({"the_node": starting_node, "parent": None, "g_value": 0, "f_value": 0})
-    count = 0
+    #count = 0
     while open_list != []:
-        count += 1
-        print(count)
+        #count += 1
+        #print(count)
         #deals with the current node
         dict_with_lowest_f_value = min(open_list, key=lambda x:x["f_value"])
         current_node = dict_with_lowest_f_value["the_node"]
         parent_of_current_node = dict_with_lowest_f_value["parent"]
         current_node_g_value = dict_with_lowest_f_value["g_value"]  
         current_node_index = next((index for (index, d) in enumerate(open_list) if d["the_node"] == current_node), None)
-        print("open_list before pop: " + str(open_list))
+        #print("open_list before pop: " + str(open_list))
         open_list.pop(current_node_index)
 
-        print("open_list after pop: " + str(open_list))
+        #print("open_list after pop: " + str(open_list))
 
         children = find_adjacent_nodes(current_node)
         for child in children:
@@ -271,10 +272,10 @@ def a_star(starting_node, distance_till_end_function):
             child_f = child_dist_from_start + child_dist_from_end
 
             if child == ending_node:
-                print("\n")
-                print("open " + str(open_list) + "\n")
-                print("closed " + str(closed_list))
-                print("parent of current node:" + str(parent_of_current_node))
+                #print("\n")
+                #print("open " + str(open_list) + "\n")
+                #print("closed " + str(closed_list))
+                #print("parent of current node:" + str(parent_of_current_node))
                 path = []
                 path.append(child)
                 path.append(parent)
@@ -310,7 +311,7 @@ def a_star(starting_node, distance_till_end_function):
 
 
             if show_algorithm_in_progress == True:
-                time.sleep(0.3)
+                time.sleep(0.1)
                 pygame.draw.rect(screen, (255,192,203), pygame.Rect(20*child[1], 20*child[0], 20, 20))
                 pygame.draw.rect(screen, (255,40,90), pygame.Rect(20*current_node[1], 20*current_node[0], 20, 20))
                 for items in closed_list:
@@ -335,11 +336,8 @@ def a_star(starting_node, distance_till_end_function):
 
         closed_list.append(dict_with_lowest_f_value)
 
-
-
-
-        print("closed list at end of while loop: " + str(closed_list))
-        print("open list at end of while loop: " + str(open_list))
+        #print("closed list at end of while loop: " + str(closed_list))
+        #print("open list at end of while loop: " + str(open_list))
 
 running = True
 
@@ -355,15 +353,15 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
-            running = False
+            sys.exit()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_q:
                 pygame.quit()
-                running = False
+                sys.exit()
             elif event.key == pygame.K_RETURN:
                 maze = np.array(maze)
                 maze = np.swapaxes(maze,0,1)
-                print("adjacent nodes = " + str(find_adjacent_nodes([0, 3])))
+                #print("adjacent nodes = " + str(find_adjacent_nodes([0, 3])))
                 print(maze)
                 path_manhattan = a_star(starting_node, manhattan_distance)
                 path_diagonal = a_star(starting_node, diagonal_distance)
@@ -394,7 +392,7 @@ while running:
                 print("Tool used: " + str(name_of_tool))
                 maze = np.swapaxes(maze,0,1)
 
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if pygame.mouse.get_pressed()[0]:
             for idx in range(len(input_box_list)):
                 if input_box_list[idx]["rectangle"].collidepoint(event.pos):
                     if three_used_up == False:
