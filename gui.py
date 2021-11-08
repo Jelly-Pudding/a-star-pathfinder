@@ -407,6 +407,7 @@ four_used_up = False
 
 # variable used to make sure the ending node isn't accidentally overwritten in the beginning
 
+wait_till_enable_hold_mouse_down = True
 count_till_hold_mouse_down = 1
 
 # if a* does not find the quickest path (due to overestimating the distance to the end node) then the distance function which always returns 0 will produce the shorest path
@@ -436,6 +437,7 @@ while running:
             pygame.quit()
             sys.exit()
         if event.type == pygame.KEYDOWN:
+        if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_q:
                 pygame.quit()
                 sys.exit()
@@ -450,6 +452,9 @@ while running:
                 enter_key_counter = 0
                 remove_fastest_path_after_clicking = True
                 show_algorithm_in_progress = False
+            if event.key == pygame.K_q:
+                pygame.quit()
+                sys.exit()
             elif event.key == pygame.K_RETURN:
                 remove_fastest_path_after_clicking = False
                 enter_key_counter += 1
