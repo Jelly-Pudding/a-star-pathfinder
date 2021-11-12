@@ -320,7 +320,6 @@ def a_star(starting_node, distance_till_end_function):
                 #print("open " + str(open_list) + "\n")
                 #print("closed " + str(closed_list))
                 #print("parent of current node:" + str(parent_of_current_node))
-                path = []
                 path.append(child)
                 path.append(parent)
                 parent = parent_of_current_node
@@ -342,6 +341,9 @@ def a_star(starting_node, distance_till_end_function):
                 # Because the child's f_value is worse than the value it has in the open list, this current child of the iteration will be skipped.
                 if open_list[child_open_list_node_index]["f_value"] < child_f:
                     continue
+                # If it is better, the values are recorded
+                else:
+                    open_list[child_open_list_node_index] = {"the_node": child, "parent": parent, "g_value": child_dist_from_start, "f_value": child_f}
             
             child_closed_list_node_index = next((index for (index, d) in enumerate(closed_list) if d["the_node"] == child), None)
             if child_closed_list_node_index != None:
@@ -349,10 +351,9 @@ def a_star(starting_node, distance_till_end_function):
                 if closed_list[child_closed_list_node_index]["f_value"] < child_f:
                     continue
                 else:
-                    if child_open_list_node_index != None:
-                        # To get to this line, the child's f_value is worthwhile recording. The original dictionary values for the node are overwritten
-                        # by the new set of values.  
-                        open_list[child_open_list_node_index] = {"the_node": child, "parent": parent, "g_value": child_dist_from_start, "f_value": child_f}
+                    # To get to this line, the child's f_value is worthwhile recording. The original dictionary values for the node are overwritten
+                    # by the new set of values.  
+                    closed_list[child_closed_list_node_index] = {"the_node": child, "parent": parent, "g_value": child_dist_from_start, "f_value": child_f}
 
             child_unseen_list_node_index = next((index for (index, d) in enumerate(unseen_list) if d["the_node"] == child), None)
             if child_unseen_list_node_index != None:
@@ -389,12 +390,16 @@ def a_star(starting_node, distance_till_end_function):
                 for i in range(len(maze)):
                     pygame.draw.line(screen, (255, 255, 255), (i*20, 0), (i*20, num_of_cols*20), 2)
                     for j in range(len(maze[i])):
-                        pygame.draw.line(screen, (255, 255, 255), (0, j*20), (num_of_rows*20, j*20), 2)
+                        pygame.draw.line(screen, (255, 255, 255), (0, i*20), (num_of_rows*20, i*20), 2)
                 pygame.display.update()
             
         # The node that was being considered has now been considered, so it is added to the closed list.
+        current_node_index_closed = next((index for (index, d) in enumerate(closed_list) if d["the_node"] == current_node), None)
+        if current_node_index_closed == None:
+            closed_list.append(dict_with_lowest_f_value)
+        else:
+            closed_list[current_node_index_closed] = dict_with_lowest_f_value
 
-        closed_list.append(dict_with_lowest_f_value)
 
         #print("closed list at end of while loop: " + str(closed_list))
         #print("open list at end of while loop: " + str(open_list))
@@ -415,8 +420,6 @@ count_till_hold_mouse_down = 1
 # no time delay. 
 
 bruteforce_dijkstra = False
-
-enter_key_counter = 0
 
 remove_fastest_path_after_clicking = False
 
@@ -456,29 +459,27 @@ while running:
                 sys.exit()
             elif event.key == pygame.K_RETURN:
                 remove_fastest_path_after_clicking = False
-                enter_key_counter += 1
-                if enter_key_counter >= 2:
-                    # A variable that makes sure only the fastest path is shown (e.g. the path that used the manhattan distance etc.)
-                    show_algorithm_in_progress = False
-                    # Resets the maze (removes the fastest path marked in green and shows the starting and ending nodes again)
-                    for i in range(len(maze)):
-                        for j in range(len(maze[i])):
-                            # The starting node (shown as blue)
-                            if maze[i][j] == 3:
-                                pygame.draw.rect(screen, (0,0,255), pygame.Rect(20*i, 20*j, 20, 20))
-                            # The ending node (shown as green)
-                            elif maze[i][j] == 4:
-                                pygame.draw.rect(screen, (0,255,0), pygame.Rect(20*i, 20*j, 20, 20))
-                            # Barriers in the path (shown as red)
-                            elif maze[i][j] == 1:
-                                pygame.draw.rect(screen, (255,0,0), pygame.Rect(20*i, 20*j, 20, 20)) 
-                                # "Normal" nodes (shown as grey)        
-                            else:
-                                pygame.draw.rect(screen, (40,40,40), pygame.Rect(20*i, 20*j, 20, 20))
+                # A variable that makes sure only the fastest path is shown (e.g. the path that used the manhattan distance etc.)
+                show_algorithm_in_progress = False
+                # Resets the maze (removes the fastest path marked in green and shows the starting and ending nodes again)
+                for i in range(len(maze)):
+                    for j in range(len(maze[i])):
+                        # The starting node (shown as blue)
+                        if maze[i][j] == 3:
+                            pygame.draw.rect(screen, (0,0,255), pygame.Rect(20*i, 20*j, 20, 20))
+                        # The ending node (shown as green)
+                        elif maze[i][j] == 4:
+                            pygame.draw.rect(screen, (0,255,0), pygame.Rect(20*i, 20*j, 20, 20))
+                        # Barriers in the path (shown as red)
+                        elif maze[i][j] == 1:
+                            pygame.draw.rect(screen, (255,0,0), pygame.Rect(20*i, 20*j, 20, 20)) 
+                            # "Normal" nodes (shown as grey)
+                        else:
+                            pygame.draw.rect(screen, (40,40,40), pygame.Rect(20*i, 20*j, 20, 20))
                 maze = np.array(maze)
                 maze = np.swapaxes(maze,0,1)
                 #print("adjacent nodes = " + str(find_adjacent_nodes([0, 3])))
-                print(maze)
+                #print(maze)
                 # There will be a TypeError if the maze is impossible to complete
                 try:
                     path_manhattan = a_star(starting_node, manhattan_distance)
