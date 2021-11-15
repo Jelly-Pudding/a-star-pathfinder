@@ -263,58 +263,49 @@ def zero_distance(node):
 show_algorithm_in_progress = False
 
 def a_star(starting_node, distance_till_end_function):
-    child_count = 0 
-    count = 0
+    #child_count = 0 
+    #count = 0
     # A list that will store the path the algorithm found
     path = []
-    # A list that contains every node in the maze
-    unseen_list = []
-    for i in range(len(maze)):
-        for j in range(len(maze[i])):
-            unseen_list.append({"the_node": [i, j]})
-    # print(unseen_list)
-    # The open list contains candidate nodes that will be compared with one another (and the one with the shortest f_value
+    # The open list contains candidate nodes that will be compared with one another (and the one with the lowest f value
     # will be the one that gets picked)
     open_list = []
-
-    # The closed list tracks the nodes that were picked as having the lowest f_value. This will prove useful when it comes to
+    # The closed list tracks the nodes that were picked as having the lowest f value. This will prove useful when it comes to
     # finding the path the algorithm found through backtracking
-
     closed_list = []
-
     # The first node that will be considered is the starting node (which the user themselves will pick)
-
-    # This list will contain dictionaries so the information from each node (parent node and the relevant distance values) can be easily retrived.
-
+    # Both the open and closed lists will contain dictionaries so the information from each node (parent node and the relevant distance values) can be easily retrived.
     # The parent for the starting_node is set to None so that, when backtracking, we know the starting node has been reached (and hence there is no
     # need to continue trying to backtrack)
-
     open_list.append({"the_node": starting_node, "parent": None, "g_value": 0, "f_value": 0})
     # count = 0
     while open_list != []:
         # count += 1
         # print(count)
-        # Deals with the current node
+        # Finds the dictionary in the open list with the lowest f value (which is the distance from the starting node plus the estimated distance to the ending node)
         dict_with_lowest_f_value = min(open_list, key=lambda x:x["f_value"])
         current_node = dict_with_lowest_f_value["the_node"]
         parent_of_current_node = dict_with_lowest_f_value["parent"]
         current_node_g_value = dict_with_lowest_f_value["g_value"]  
+        # Equals None if the current node is not in the open list - otherwise this gives the index of the dictionary's place in the list.
+        # It will never equal None because the current node just came from the open list, but this syntax works and it will be used throughout
+        # this function.
         current_node_index = next((index for (index, d) in enumerate(open_list) if d["the_node"] == current_node), None)
         #print("open_list before pop: " + str(open_list))
+        # Because we will now consider the node found in the open list, it is removed from the open list (so we won't consider it again / get stuck in a loop 
+        # if it always has the lowest f value in the list)
         open_list.pop(current_node_index)
-
         #print("open_list after pop: " + str(open_list))
-
         children = find_adjacent_nodes(current_node)
         for child in children:
             parent = current_node
             # As the child is one square away from its parent, its distance from the start can be found by simping adding one on top of
-            # The parent's distance from the starting node. This distance won't necessarily be the quickest route to get from the starting
+            # the parent's distance from the starting node. This distance won't necessarily be the quickest route to get from the starting
             # node to the child node. 
             child_dist_from_start = current_node_g_value + 1
             child_dist_from_end = distance_till_end_function(child)
             child_f = child_dist_from_start + child_dist_from_end
-
+            # We have found our optimum solution if the below line is true, so the algorithm ends and the quickest route is found through backtracking. 
             if child == ending_node:
                 #print("\n")
                 #print("open " + str(open_list) + "\n")
@@ -331,7 +322,7 @@ def a_star(starting_node, distance_till_end_function):
                         parent = None
                     else:
                         parent = closed_list[parent_closed_list_index]["parent"]
-                # The path list is reversed to give the path from the starting node to the ending node (and not vice versa)
+                # The path list is reversed to give the path from the starting node to the ending node 
                 return path[::-1]
 
 
@@ -341,9 +332,6 @@ def a_star(starting_node, distance_till_end_function):
                 # Because the child's f_value is worse than the value it has in the open list, this current child of the iteration will be skipped.
                 if open_list[child_open_list_node_index]["f_value"] < child_f:
                     continue
-                # If it is better, the values are recorded
-                else:
-                    open_list[child_open_list_node_index] = {"the_node": child, "parent": parent, "g_value": child_dist_from_start, "f_value": child_f}
             
             child_closed_list_node_index = next((index for (index, d) in enumerate(closed_list) if d["the_node"] == child), None)
             if child_closed_list_node_index != None:
@@ -354,53 +342,65 @@ def a_star(starting_node, distance_till_end_function):
                     # To get to this line, the child's f_value is worthwhile recording. The original dictionary values for the node are overwritten
                     # by the new set of values.  
                     closed_list[child_closed_list_node_index] = {"the_node": child, "parent": parent, "g_value": child_dist_from_start, "f_value": child_f}
+                    # Also update the open list values for good measure (if it is in the open list)
+                    if child_open_list_node_index != None:
+                        open_list[child_open_list_node_index] = {"the_node": child, "parent": parent, "g_value": child_dist_from_start, "f_value": child_f}
+            # If it's not in the open list, and if it's not in the closed list (or if it is and it beats the closed list's value), then this node will need
+            # to be considered and so it is appended to the open list
+            if child_open_list_node_index == None:
+                if child_closed_list_node_index == None or closed_list[child_closed_list_node_index]["f_value"] > child_f:
+                    open_list.append({"the_node": child, "parent": parent, "g_value": child_dist_from_start, "f_value": child_f})
 
-            child_unseen_list_node_index = next((index for (index, d) in enumerate(unseen_list) if d["the_node"] == child), None)
-            if child_unseen_list_node_index != None:
-                # The unseen_list has every node. If it contains the child node, then the child node gets appended to the open list because it hasn't been
-                # considered yet. It also gets removed from the unseen_list because it will now get considered. 
-                open_list.append({"the_node": child, "parent": parent, "g_value": child_dist_from_start, "f_value": child_f})
-                unseen_list.pop(child_unseen_list_node_index)
+                # This bool variable decides whether or not the algorithm's progress and outcome are shown on the gui board.
 
-            # This bool variable decides whether or not the algorithm's progress and outcome are shown on the gui board.
-
-            if show_algorithm_in_progress == True:
-                # The bool variable bruteforce_dijkstra will be True when the a* path finding algorithm failed to find the optimal path due to 
-                # overestimation of the distance to the end node. Because the alternative method (dijkstra) is much slower, there won't be any time delay whatsoever 
-                # if this variable is True. 
-                # For smaller board congifurations, the output to the gui board will be slowed down.
-                if num_of_cols + num_of_rows <= 20 and bruteforce_dijkstra != True:
-                    time.sleep(0.05)
+        if show_algorithm_in_progress == True:
+            # The bool variable bruteforce_dijkstra will be True when the a* path finding algorithm failed to find the optimal path due to 
+            # overestimating the distance to the end node. Because the alternative method (dijkstra) is much slower, there won't be any time delay whatsoever 
+            # if this variable is True. 
+            # Furthermore, for smaller board configurations, the output to the gui board will be slowed down (otherwise it's over in the blink of an eye)
+            if num_of_cols + num_of_rows <= 20 and bruteforce_dijkstra != True:
+                time.sleep(0.05)
+            # The child nodes are coloured pink
+            for child in children:
                 pygame.draw.rect(screen, (255,192,203), pygame.Rect(20*child[1], 20*child[0], 20, 20))
-                pygame.draw.rect(screen, (255,40,90), pygame.Rect(20*current_node[1], 20*current_node[0], 20, 20))
-                for items in closed_list:
-                    pygame.draw.rect(screen, (114,192,203), pygame.Rect(20*items["the_node"][1], 20*items["the_node"][0], 20, 20))  
-                current_fastest_path = []
-                current_fastest_path.append(current_node)
-                parent = parent_of_current_node
-                while parent != None:
-                    current_fastest_path.append(parent)
-                    parent_closed_list_index = next((index for (index, d) in enumerate(closed_list) if d["the_node"] == parent), None)
-                    if parent_closed_list_index == None:
-                        parent = None
-                    else:
-                        parent = closed_list[parent_closed_list_index]["parent"]
-                for items in current_fastest_path:
-                    pygame.draw.rect(screen, (150,255,220), pygame.Rect(20*items[1], 20*items[0], 20, 20))
-                for i in range(len(maze)):
-                    pygame.draw.line(screen, (255, 255, 255), (i*20, 0), (i*20, num_of_cols*20), 2)
-                    for j in range(len(maze[i])):
-                        pygame.draw.line(screen, (255, 255, 255), (0, i*20), (num_of_rows*20, i*20), 2)
-                pygame.display.update()
+            for items in closed_list:
+                # The nodes in closed_list appear as dark blue
+                pygame.draw.rect(screen, (114,192,203), pygame.Rect(20*items["the_node"][1], 20*items["the_node"][0], 20, 20))  
+            current_fastest_path = []
+            current_fastest_path.append(current_node)
+            parent = parent_of_current_node
+            while parent != None:
+                current_fastest_path.append(parent)
+                parent_closed_list_index = next((index for (index, d) in enumerate(closed_list) if d["the_node"] == parent), None)
+                if parent_closed_list_index == None:
+                    parent = None
+                else:
+                    parent = closed_list[parent_closed_list_index]["parent"]
+            # The nodes in the current fastest path appear as light blue (to contrast the nodes in the closed list)
+            for items in current_fastest_path:
+                pygame.draw.rect(screen, (150,255,220), pygame.Rect(20*items[1], 20*items[0], 20, 20))
+            for i in range(len(maze)):
+                pygame.draw.line(screen, (255, 255, 255), (i*20, 0), (i*20, num_of_cols*20), 2)
+                for j in range(len(maze[i])):
+                    pygame.draw.line(screen, (255, 255, 255), (0, i*20), (num_of_rows*20, i*20), 2)
+            if num_of_rows > num_of_cols:
+                # When the number of rows is greater, this will fill the lines in the columns that won't otherwise be covered
+                length_one = len(maze) 
+                length_two = len(maze[0])
+                difference_of_length = length_two - length_one
+                from_the_end = num_of_rows - difference_of_length
+                for i in range(difference_of_length):
+                    pygame.draw.line(screen, (255, 255, 255), (from_the_end*20, 0), (from_the_end*20, from_the_end*20), 2)
+                    from_the_end += 1
+            # Line across the bottom
+            pygame.draw.line(screen, (255, 255, 255), (0, num_of_cols*20), (num_of_rows*20, num_of_cols*20), 4)
+            # Line down the right hand side
+            pygame.draw.line(screen, (255, 255, 255), (num_of_rows*20, 0), (num_of_rows*20, num_of_cols*20), 4)
+            pygame.display.update()
+            # End of the gui display
             
         # The node that was being considered has now been considered, so it is added to the closed list.
-        current_node_index_closed = next((index for (index, d) in enumerate(closed_list) if d["the_node"] == current_node), None)
-        if current_node_index_closed == None:
-            closed_list.append(dict_with_lowest_f_value)
-        else:
-            closed_list[current_node_index_closed] = dict_with_lowest_f_value
-
-
+        closed_list.append(dict_with_lowest_f_value)
         #print("closed list at end of while loop: " + str(closed_list))
         #print("open list at end of while loop: " + str(open_list))
 
@@ -481,32 +481,34 @@ while running:
                 #print("adjacent nodes = " + str(find_adjacent_nodes([0, 3])))
                 #print(maze)
                 # There will be a TypeError if the maze is impossible to complete
+                # (For example if barrier blocks surround the exit)
                 try:
-                    path_manhattan = a_star(starting_node, manhattan_distance)
                     path_diagonal = a_star(starting_node, diagonal_distance)
+                    path_manhattan = a_star(starting_node, manhattan_distance)                   
                     path_euclidean = a_star(starting_node, euclidean_distance)
                     path_zero = a_star(starting_node, zero_distance)
-                    print("manhattan path = " + str(path_manhattan))
-                    print("manhattan path length:" + str(len(path_manhattan)))
-                    print("diagonal path = " + str(path_diagonal))
-                    print("diagonal path length:" + str(len(path_diagonal)))
-                    print("euclidean path = " + str(path_euclidean))
-                    print("euclidean path length:" + str(len(path_euclidean)))
-                    print("zero distance = " + str(path_zero))
-                    print("zero distance path length:" + str(len(path_zero)))
-                    different_paths = [path_manhattan, path_diagonal, path_euclidean, path_zero]
+                    printer(maze)
+                    print("Diagonal path: " + str(path_diagonal))
+                    print("Diagonal path length:" + str(len(path_diagonal)))
+                    print("Manhattan path: " + str(path_manhattan))
+                    print("Manhattan path length:" + str(len(path_manhattan)))
+                    print("Euclidean path: " + str(path_euclidean))
+                    print("Euclidean path length:" + str(len(path_euclidean)))
+                    print("Zero distance: " + str(path_zero))
+                    print("Zero distance path length:" + str(len(path_zero)))
+                    different_paths = [path_diagonal, path_manhattan, path_euclidean, path_zero]
                     best_path = min(different_paths, key=len)
                     for i in range(len(different_paths)):
                         if different_paths[i] == best_path:
                             show_algorithm_in_progress = True
                             if i == 0:
-                                name_of_tool = "manhattan"
-                                a_star(starting_node, manhattan_distance)
-                            elif i == 1:
-                                name_of_tool = "diagonal"
+                                name_of_tool = "Diagonal distance"
                                 a_star(starting_node, diagonal_distance)
+                            elif i == 1:
+                                name_of_tool = "Manhattan distance"
+                                a_star(starting_node, manhattan_distance)
                             elif i == 2:
-                                name_of_tool = "euclidean"
+                                name_of_tool = "Euclidean distance"
                                 a_star(starting_node, euclidean_distance)
                             elif i == 3:
                                 bruteforce_dijkstra = True
@@ -514,13 +516,13 @@ while running:
                                 a_star(starting_node, zero_distance)
                             break
                     hit_enter = True
-                    print("best path - " + str(best_path))
+                    print("Best path: " + str(best_path))
                     print("Tool used: " + str(name_of_tool))
                     maze = np.swapaxes(maze,0,1)
                 # If the maze is impossible to complete, this information gets printed to the console
-                except TypeError:
-                    printer(maze)
+                except TypeError as e:
                     print("There is no solution to this maze!")
+                    #print(e)
                     pygame.quit()
                     sys.exit()
         if four_used_up == False or count_till_hold_mouse_down != 0:
