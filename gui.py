@@ -488,14 +488,16 @@ while running:
                     path_euclidean = a_star(starting_node, euclidean_distance)
                     path_zero = a_star(starting_node, zero_distance)
                     printer(maze)
-                    print("Diagonal path: " + str(path_diagonal))
-                    print("Diagonal path length:" + str(len(path_diagonal)))
+                    # prevents "Diagonal path: None" being printed to the console if there is no solution
+                    if path_diagonal != None:
+                        print("Diagonal path: " + str(path_diagonal))
+                    print("Diagonal path length: " + str(len(path_diagonal)))
                     print("Manhattan path: " + str(path_manhattan))
-                    print("Manhattan path length:" + str(len(path_manhattan)))
+                    print("Manhattan path length: " + str(len(path_manhattan)))
                     print("Euclidean path: " + str(path_euclidean))
-                    print("Euclidean path length:" + str(len(path_euclidean)))
+                    print("Euclidean path length: " + str(len(path_euclidean)))
                     print("Zero distance: " + str(path_zero))
-                    print("Zero distance path length:" + str(len(path_zero)))
+                    print("Zero distance path length: " + str(len(path_zero)))
                     different_paths = [path_diagonal, path_manhattan, path_euclidean, path_zero]
                     best_path = min(different_paths, key=len)
                     for i in range(len(different_paths)):
