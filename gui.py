@@ -314,7 +314,7 @@ def a_star(starting_node, distance_till_end_function):
                 path.append(child)
                 path.append(parent)
                 parent = parent_of_current_node
-                # The parent of starting_node is None, and so this while loop while backtrack until we reach the starting node
+                # The parent of starting_node is None, and so this while loop will backtrack until we reach the starting node
                 while parent != None:
                     path.append(parent)
                     parent_closed_list_index = next((index for (index, d) in enumerate(closed_list) if d["the_node"] == parent), None)
