@@ -294,6 +294,7 @@ def a_star(starting_node, distance_till_end_function):
         # Because we will now consider the node found in the open list, it is removed from the open list (so we won't consider it again / get stuck in a loop 
         # if it always has the lowest f value in the list)
         open_list.pop(current_node_index)
+        closed_list.append(dict_with_lowest_f_value)
         #print("open_list after pop: " + str(open_list))
         children = find_adjacent_nodes(current_node)
         for child in children:
@@ -324,33 +325,21 @@ def a_star(starting_node, distance_till_end_function):
                 # The path list is reversed to give the path from the starting node to the ending node 
                 return path[::-1]
 
-
-            # Equals None if the child node is not in the open list - otherwise this gives the index of the dictionary's place in the list
-            child_open_list_node_index = next((index for (index, d) in enumerate(open_list) if d["the_node"] == child), None)
-            if child_open_list_node_index != None:
-                # Because the child's f_value is greater than (or equal to) the value it has in the open list, this current child of the iteration will be skipped.
-                if open_list[child_open_list_node_index]["f_value"] <= child_f:
-                    continue
-                else:
-                    open_list[child_open_list_node_index] = {"the_node": child, "parent": parent, "g_value": child_dist_from_start, "f_value": child_f}
-            
             child_closed_list_node_index = next((index for (index, d) in enumerate(closed_list) if d["the_node"] == child), None)
-            # If it's not in the open list, and if it's not in the closed list (or if it is and it beats the closed list's value), then this node will need
-            # to be considered and so it is appended to the open list
-            if child_open_list_node_index == None:
-                if child_closed_list_node_index == None or closed_list[child_closed_list_node_index]["f_value"] > child_f:
-                    open_list.append({"the_node": child, "parent": parent, "g_value": child_dist_from_start, "f_value": child_f})
+            # This child was already evaluated so the current iteration gets skipped
             if child_closed_list_node_index != None:
-                # For similar reasoning, because the closed list has the node having a lower f_value, the child gets skipped. 
-                if closed_list[child_closed_list_node_index]["f_value"] < child_f:
-                    continue
-                else:
-                    # To get to this line, the child's f_value is worthwhile recording. The original dictionary values for the node are overwritten
-                    # by the new set of values.  
-                    closed_list[child_closed_list_node_index] = {"the_node": child, "parent": parent, "g_value": child_dist_from_start, "f_value": child_f}
-                    # Also update the open list values for good measure (if it is in the open list)
-                    if child_open_list_node_index != None:
-                        open_list[child_open_list_node_index] = {"the_node": child, "parent": parent, "g_value": child_dist_from_start, "f_value": child_f}
+                continue
+            # If it's not in the open list, it gets added
+            child_open_list_node_index = next((index for (index, d) in enumerate(open_list) if d["the_node"] == child), None)
+            if child_open_list_node_index == None:
+                open_list.append({"the_node": child, "parent": parent, "g_value": child_dist_from_start, "f_value": child_f})
+            # If it's in the open list and its path is worse, the current itertaion gets skipped
+            elif child_f >= open_list[child_open_list_node_index]["f_value"]:
+                continue
+            # To reach this line, the path must be good, and so it gets recorded
+            child_open_list_node_index = next((index for (index, d) in enumerate(open_list) if d["the_node"] == child), None)
+            open_list[child_open_list_node_index] = {"the_node": child, "parent": parent, "g_value": child_dist_from_start, "f_value": child_f}
+
         # This bool variable decides whether or not the algorithm's progress and outcome are shown on the gui board.
 
         if show_algorithm_in_progress == True:
@@ -402,14 +391,6 @@ def a_star(starting_node, distance_till_end_function):
             pygame.draw.line(screen, (255, 255, 255), (num_of_rows*20, 0), (num_of_rows*20, num_of_cols*20), 4)
             pygame.display.update()
             # End of the gui display
-            
-        # The node that was being considered has now been considered, so it is added to the closed list.
-        current_closed_list_index = next((index for (index, d) in enumerate(closed_list) if d["the_node"] == current_node), None)
-        if current_closed_list_index == None:
-            closed_list.append(dict_with_lowest_f_value)
-        #print("closed list at end of while loop: " + str(closed_list))
-        #print("open list at end of while loop: " + str(open_list))
-
 
 #3 represents the starting node, and #4 the ending node (or goal node). Each should only be placed once, so these bool variables keep track of whether they have been placed.
 
@@ -524,7 +505,7 @@ while running:
                 # If the maze is impossible to complete, this information gets printed to the console
                 except TypeError as e:
                     print("There is no solution to this maze!")
-                    #print(e)
+                    print(e)
                     pygame.quit()
                     sys.exit()
         if four_used_up == False:
