@@ -328,8 +328,8 @@ def a_star(starting_node, distance_till_end_function):
             # Equals None if the child node is not in the open list - otherwise this gives the index of the dictionary's place in the list
             child_open_list_node_index = next((index for (index, d) in enumerate(open_list) if d["the_node"] == child), None)
             if child_open_list_node_index != None:
-                # Because the child's f_value is greater than the value it has in the open list, this current child of the iteration will be skipped.
-                if open_list[child_open_list_node_index]["f_value"] < child_f:
+                # Because the child's f_value is greater than (or equal to) the value it has in the open list, this current child of the iteration will be skipped.
+                if open_list[child_open_list_node_index]["f_value"] <= child_f:
                     continue
                 else:
                     open_list[child_open_list_node_index] = {"the_node": child, "parent": parent, "g_value": child_dist_from_start, "f_value": child_f}
@@ -404,7 +404,9 @@ def a_star(starting_node, distance_till_end_function):
             # End of the gui display
             
         # The node that was being considered has now been considered, so it is added to the closed list.
-        closed_list.append(dict_with_lowest_f_value)
+        current_closed_list_index = next((index for (index, d) in enumerate(closed_list) if d["the_node"] == current_node), None)
+        if current_closed_list_index == None:
+            closed_list.append(dict_with_lowest_f_value)
         #print("closed list at end of while loop: " + str(closed_list))
         #print("open list at end of while loop: " + str(open_list))
 
