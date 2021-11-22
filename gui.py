@@ -278,10 +278,9 @@ def a_star(starting_node, distance_till_end_function):
     # The parent for the starting_node is set to None so that, when backtracking, we know the starting node has been reached (and hence there is no
     # need to continue trying to backtrack)
     open_list.append({"the_node": starting_node, "parent": None, "g_value": 0, "f_value": 0})
-    # count = 0
     while open_list != []:
-        # count += 1
-        # print(count)
+        #count += 1
+        #print(count)
         # Finds the dictionary in the open list with the lowest f value (which is the distance from the starting node plus the estimated distance to the ending node)
         dict_with_lowest_f_value = min(open_list, key=lambda x:x["f_value"])
         current_node = dict_with_lowest_f_value["the_node"]
@@ -329,11 +328,18 @@ def a_star(starting_node, distance_till_end_function):
             # Equals None if the child node is not in the open list - otherwise this gives the index of the dictionary's place in the list
             child_open_list_node_index = next((index for (index, d) in enumerate(open_list) if d["the_node"] == child), None)
             if child_open_list_node_index != None:
-                # Because the child's f_value is worse than the value it has in the open list, this current child of the iteration will be skipped.
+                # Because the child's f_value is greater than the value it has in the open list, this current child of the iteration will be skipped.
                 if open_list[child_open_list_node_index]["f_value"] < child_f:
                     continue
+                else:
+                    open_list[child_open_list_node_index] = {"the_node": child, "parent": parent, "g_value": child_dist_from_start, "f_value": child_f}
             
             child_closed_list_node_index = next((index for (index, d) in enumerate(closed_list) if d["the_node"] == child), None)
+            # If it's not in the open list, and if it's not in the closed list (or if it is and it beats the closed list's value), then this node will need
+            # to be considered and so it is appended to the open list
+            if child_open_list_node_index == None:
+                if child_closed_list_node_index == None or closed_list[child_closed_list_node_index]["f_value"] > child_f:
+                    open_list.append({"the_node": child, "parent": parent, "g_value": child_dist_from_start, "f_value": child_f})
             if child_closed_list_node_index != None:
                 # For similar reasoning, because the closed list has the node having a lower f_value, the child gets skipped. 
                 if closed_list[child_closed_list_node_index]["f_value"] < child_f:
@@ -345,13 +351,7 @@ def a_star(starting_node, distance_till_end_function):
                     # Also update the open list values for good measure (if it is in the open list)
                     if child_open_list_node_index != None:
                         open_list[child_open_list_node_index] = {"the_node": child, "parent": parent, "g_value": child_dist_from_start, "f_value": child_f}
-            # If it's not in the open list, and if it's not in the closed list (or if it is and it beats the closed list's value), then this node will need
-            # to be considered and so it is appended to the open list
-            if child_open_list_node_index == None:
-                if child_closed_list_node_index == None or closed_list[child_closed_list_node_index]["f_value"] > child_f:
-                    open_list.append({"the_node": child, "parent": parent, "g_value": child_dist_from_start, "f_value": child_f})
-
-                # This bool variable decides whether or not the algorithm's progress and outcome are shown on the gui board.
+        # This bool variable decides whether or not the algorithm's progress and outcome are shown on the gui board.
 
         if show_algorithm_in_progress == True:
             # The bool variable bruteforce_dijkstra will be True when the a* path finding algorithm failed to find the optimal path due to 
@@ -362,6 +362,8 @@ def a_star(starting_node, distance_till_end_function):
                 time.sleep(0.05)
             elif num_of_cols + num_of_rows <= 30 and bruteforce_dijkstra != True:
                 time.sleep(0.02)
+            elif num_of_cols + num_of_rows <= 40 and bruteforce_dijkstra != True:
+                time.sleep(0.01)
             # The child nodes are coloured pink
             for child in children:
                 pygame.draw.rect(screen, (255,192,203), pygame.Rect(20*child[1], 20*child[0], 20, 20))
