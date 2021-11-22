@@ -27,10 +27,10 @@ input_text = ""
 input_text2 = ""
 
 def displayer():
-    textsurface = myfont.render("Enter Row#:", False, (90, 0, 0))
-    screen.blit(textsurface,(30,10))
-    secondquestion = myfont.render("Enter Column#:", False, (90, 0, 0))
-    screen.blit(secondquestion,(7,80))
+    textsurface = myfont.render("Enter Column#:", False, (90, 0, 0))
+    screen.blit(textsurface,(7,10))
+    secondquestion = myfont.render("Enter Row#:", False, (90, 0, 0))
+    screen.blit(secondquestion,(30,80))
     if active1 == True:
         pygame.draw.rect(screen, color_active, input_box1)
     else:
@@ -360,6 +360,8 @@ def a_star(starting_node, distance_till_end_function):
             # Furthermore, for smaller board configurations, the output to the gui board will be slowed down (otherwise it's over in the blink of an eye)
             if num_of_cols + num_of_rows <= 20 and bruteforce_dijkstra != True:
                 time.sleep(0.05)
+            elif num_of_cols + num_of_rows <= 30 and bruteforce_dijkstra != True:
+                time.sleep(0.02)
             # The child nodes are coloured pink
             for child in children:
                 pygame.draw.rect(screen, (255,192,203), pygame.Rect(20*child[1], 20*child[0], 20, 20))
@@ -410,11 +412,6 @@ def a_star(starting_node, distance_till_end_function):
 three_used_up = False
 four_used_up = False
 
-# variable used to make sure the ending node isn't accidentally overwritten in the beginning
-
-wait_till_enable_hold_mouse_down = True
-count_till_hold_mouse_down = 1
-
 # if a* does not find the quickest path (due to overestimating the distance to the end node) then the distance function which always returns 0 will produce the shorest path
 # to the destination. Because this is a much longer method for arriving at the destination, this variable will be set to true so that when one sees the grid gui, there will be
 # no time delay. 
@@ -449,7 +446,6 @@ while running:
                         maze[i][j] = 0
                 three_used_up = False
                 four_used_up = False
-                count_till_hold_mouse_down = 1
                 bruteforce_dijkstra = False
                 enter_key_counter = 0
                 remove_fastest_path_after_clicking = True
@@ -527,7 +523,7 @@ while running:
                     #print(e)
                     pygame.quit()
                     sys.exit()
-        if four_used_up == False or count_till_hold_mouse_down != 0:
+        if four_used_up == False:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 for idx in range(len(input_box_list)):
                     if input_box_list[idx]["rectangle"].collidepoint(event.pos):
@@ -556,8 +552,8 @@ while running:
                             #print(idx)
                             #print(input_box_list[idx]["coordinates"])
                             # Subsequent clicks create barriers in the path
+                            print(maze[input_box_list[idx]["coordinates"][0]][input_box_list[idx]["coordinates"][1]])
                             maze[input_box_list[idx]["coordinates"][0]][input_box_list[idx]["coordinates"][1]] = 1
-                            count_till_hold_mouse_down -= 1
 
         elif pygame.mouse.get_pressed()[0]:
             remove_fastest_path_after_clicking = True
@@ -566,7 +562,8 @@ while running:
             try:
                 for idx in range(len(input_box_list)):
                     if input_box_list[idx]["rectangle"].collidepoint(event.pos):
-                        maze[input_box_list[idx]["coordinates"][0]][input_box_list[idx]["coordinates"][1]] = 1
+                        if maze[input_box_list[idx]["coordinates"][0]][input_box_list[idx]["coordinates"][1]] != 3 and maze[input_box_list[idx]["coordinates"][0]][input_box_list[idx]["coordinates"][1]] != 4:
+                            maze[input_box_list[idx]["coordinates"][0]][input_box_list[idx]["coordinates"][1]] = 1
             except AttributeError:
                 pass
 
